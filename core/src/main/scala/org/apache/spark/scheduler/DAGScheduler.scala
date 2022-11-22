@@ -1516,7 +1516,7 @@ private[spark] class DAGScheduler(
 //            logInfo(s"[EXTRA LOG] results ${event.result.toString} and ${resultsMap(task.stageId)(taskIndex / 2)(0)} do not match")
 //            //abortStage(stageIdToStage(task.stageId), "NOT REACHING CONCENSUS", None);
 //            logError("===========================================================================================")
-//            logError("===========================================================================================")
+//            logError("======================================================================================outputId=====")
 //            logError(s"SHOULD ABORT DUE TO NOT REACHING CONSENSUS DUE TO TASK (${taskIndex}) AND AND ITS RELATIVE")
 //            logError("===========================================================================================")
 //            logError("===========================================================================================")
@@ -1531,10 +1531,11 @@ private[spark] class DAGScheduler(
 //      }
 //    }
 
-      this.synchronized {
-        logInfo("Calling verifyResult() from TaskResultVerification")
-        TaskResultVerificationManager.verifyResult(event.taskInfo.taskId.toInt)
-      }
+      //this.synchronized {
+      //  logInfo("Calling verifyResult() from TaskResultVerification")
+      //  TaskResultVerificationManager.verifyResult(event.taskInfo.taskId.toInt)
+      //  logInfo("Verification Completed")
+      //}
 
     // Make sure the task's accumulators are updated before any other processing happens, so that
     // we can post a task end event before any jobs or stages are updated. The accumulators are
@@ -2132,6 +2133,8 @@ private[spark] class DAGScheduler(
     if (errorMessage.isEmpty) {
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
+
+      TaskResultVerificationManager.verifyStageResults(stage.id)
 
       // Clear failure count for this stage, now that it's succeeded.
       // We only limit consecutive failures of stage attempts,so that if a stage is

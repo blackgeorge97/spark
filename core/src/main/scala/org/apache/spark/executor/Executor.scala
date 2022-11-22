@@ -639,6 +639,8 @@ private[spark] class Executor(
         logInfo(s"[EXTRA LOG][in task run] result hash (for TID ${taskId}) serialised:" +
                 s"[${hashValueCandidate.toString}]")
 
+        TaskResultVerificationManager.addNewResultForTid(taskId, task.stageId ,hashValueCandidate.toString)
+
 //        try{
 //          var a = localContractWorker.instance().submitResults(taskId.toInt/2, resultHash, 1366);
 //          if(a.getError() != null){

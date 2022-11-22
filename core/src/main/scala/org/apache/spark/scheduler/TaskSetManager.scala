@@ -75,7 +75,7 @@ private[spark] class TaskSetManager(
   /**
    * Added by john
    */
-  val taskIndexToHost = new mutable.HashMap[Int, HashMap[Long, String]]
+  val taskIndexToHost = new mutable.HashMap[Int, HashMap[Long, Option[String]]]
 
 
   val tasks = taskSet.tasks
@@ -138,12 +138,12 @@ private[spark] class TaskSetManager(
    * @param host: String, hostaname || ip
    * @return Boolean
    */
-  private[scheduler] def isRelativeOnSameNode(index: Long, host: String, stage_id: Int): Boolean = {
+  private[scheduler] def isRelativeOnSameNode(index: Long, host: String, addr: Option[String], stage_id: Int): Boolean = {
 
     if(stage_id >= 0) {
       if (taskIndexToHost.contains(stage_id)) {
-        if ((index % 2 == 0 && taskIndexToHost(stage_id).contains(index + 1) && taskIndexToHost(stage_id)(index + 1) == host) ||
-          (index % 2 == 1 && taskIndexToHost(stage_id).contains(index - 1) && taskIndexToHost(stage_id)(index - 1) == host)) {
+        if ((index % 2 == 0 && taskIndexToHost(stage_id).contains(index + 1) && taskIndexToHost(stage_id)(index + 1) == addr) ||
+          (index % 2 == 1 && taskIndexToHost(stage_id).contains(index - 1) && taskIndexToHost(stage_id)(index - 1) == addr)) {
           return true
         }
       }
@@ -302,6 +302,7 @@ private[spark] class TaskSetManager(
   private def dequeueTaskFromList(
       execId: String,
       host: String,
+      addr: Option[String],
       list: ArrayBuffer[Int],
       speculative: Boolean = false,
       list_id: Int = -1): Option[Int] = {
@@ -311,7 +312,7 @@ private[spark] class TaskSetManager(
       val index = list(indexOffset)
       if (!isTaskBlacklistedOnExecOrNode(index, execId, host) &&
           !(speculative && hasAttemptOnHost(index, host)) &&
-          !isRelativeOnSameNode(index, host, list_id)) {
+          !isRelativeOnSameNode(index, host, addr, list_id)) {
         // This should almost always be list.trimEnd(1) to remove tail
         list.remove(indexOffset)
         // Speculatable task should only be launched when at most one copy of the
@@ -349,19 +350,21 @@ private[spark] class TaskSetManager(
   private def dequeueTask(
       execId: String,
       host: String,
+      addr: Option[String],
       maxLocality: TaskLocality.Value,
       list_id: Int = -1): Option[(Int, TaskLocality.Value, Boolean)] = {
       // Tries to schedule a regular task first; if it returns None, then schedules
       // a speculative task
       this.synchronized {
-        dequeueTaskHelper(execId, host, maxLocality, speculative = false, list_id = list_id).orElse(
-          dequeueTaskHelper(execId, host, maxLocality, speculative = true, list_id = list_id))
+        dequeueTaskHelper(execId, host, addr, maxLocality, speculative = false, list_id = list_id).orElse(
+          dequeueTaskHelper(execId, host, addr, maxLocality, speculative = true, list_id = list_id))
       }
     }
 
   protected def dequeueTaskHelper(
       execId: String,
       host: String,
+      addr: Option[String],
       maxLocality: TaskLocality.Value,
       speculative: Boolean,
       list_id: Int = -1): Option[(Int, TaskLocality.Value, Boolean)] = {
@@ -370,7 +373,7 @@ private[spark] class TaskSetManager(
     }
     val pendingTaskSetToUse = if (speculative) pendingSpeculatableTasks else pendingTasks
     def dequeue(list: ArrayBuffer[Int]): Option[Int] = {
-      val task = dequeueTaskFromList(execId, host, list, speculative, list_id)
+      val task = dequeueTaskFromList(execId, host, addr,list, speculative, list_id)
       if (speculative && task.isDefined) {
         speculatableTasks -= task.get
       }
@@ -426,6 +429,7 @@ private[spark] class TaskSetManager(
   def resourceOffer(
       execId: String,
       host: String,
+      addr: Option[String],
       maxLocality: TaskLocality.TaskLocality,
       availableResources: Map[String, Seq[String]] = Map.empty)
     : Option[TaskDescription] =
@@ -447,18 +451,18 @@ private[spark] class TaskSetManager(
         }
       }
 
-      dequeueTask(execId, host, allowedLocality, taskSet.stageId).map { case ((index, taskLocality, speculative)) =>
+      dequeueTask(execId, host, addr, allowedLocality, taskSet.stageId).map { case ((index, taskLocality, speculative)) =>
         // Found a task; do some bookkeeping and return a task description
         val task = tasks(index)
         val taskId = sched.newTaskId()
         if (taskIndexToHost.contains(taskSet.stageId)) {
-          taskIndexToHost(taskSet.stageId).put(index.toLong,host)
+          taskIndexToHost(taskSet.stageId).put(index.toLong, addr)
         } else{
-          taskIndexToHost.put(taskSet.stageId,HashMap(index.toLong -> host))
+          taskIndexToHost.put(taskSet.stageId,HashMap(index.toLong -> addr))
         }
 
         val stageIndex = (taskSet.stageId, index)
-        TaskResultVerificationManager.addNewRunningTask(taskId.toInt, stageIndex)
+        //TaskResultVerificationManager.addNewRunningTask(taskId.toInt, stageIndex)
         // Do various bookkeeping
         copiesRunning(index) += 1
         val attemptNum = taskAttempts(index).size
@@ -673,6 +677,7 @@ private[spark] class TaskSetManager(
                 taskSetBlacklist.isNodeBlacklistedForTaskSet(host) ||
                 taskSetBlacklist.isNodeBlacklistedForTask(host, indexInTaskSet)
             if (nodeBlacklisted) {
+              println("Ffffffffff")
               true
             } else {
               // Check if the task can run on any of the executors

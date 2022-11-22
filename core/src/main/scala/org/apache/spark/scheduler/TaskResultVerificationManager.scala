@@ -1,69 +1,29 @@
 package org.apache.spark.scheduler
-
-
+import java.io._
+import sys.process._
+import org.apache.spark.internal.Logging
 import scala.collection.mutable.{HashMap, HashSet}
 
-object TaskResultVerificationManager{
+object TaskResultVerificationManager
+extends Logging {
 
-  var tidToStageIndexInfo = new HashMap[Long, (Int, Int)]
-  var stageIndexToResultHash = new HashMap[(Int, Int), String]
-
-  def addNewRunningTask(tid: Int, indexStage: (Int, Int)): Unit = {
-    if(tidToStageIndexInfo.contains(tid)){
-      //      println(s"${tid} already added to running tasks")
-      return
+  def addNewResultForTid(tid: Long, stageId: Long, resultHash: String): Unit = {
+    val result = s"python /home/kwstas/Workspace/spark/core/src/main/scala/org/apache/contract/resultAdder.py ${tid} ${stageId} ${resultHash}" ! ProcessLogger(stdout append _, stderr append _)
+    if (result == 0){
+      println(s"Hashcode of task ${tid} of stage ${stageId} send to verifier Smart Contract")
     }
-    //    println(s"added ${tid} to verification manager")
-    tidToStageIndexInfo(tid) = indexStage
-  }
-
-  def addNewResultForTid(tid: Long, resultHash: String): Unit = {
-    if(tidToStageIndexInfo.contains(tid)){
-      //      println(s"adding task ${tid} to verification manager")
-      val stageIndex = tidToStageIndexInfo(tid)
-      stageIndexToResultHash(stageIndex) = resultHash
+    else {
+      println("Error while communicating with Smart Contract")
     }
   }
 
-  def verifyResult(tid: Long): Unit = {
-    //    println(s"Trying to verify result ${tid}")
-    if(tidToStageIndexInfo.contains(tid)) {
-      val stageIndex = tidToStageIndexInfo(tid)
-      if(stageIndexToResultHash.contains(stageIndex)){
-        val stageId = stageIndex._1
-        val index = stageIndex._2
-        if(index%2 == 0){
-          if(stageIndexToResultHash.contains((stageId, index+1))){
-            if(stageIndexToResultHash(stageIndex)==stageIndexToResultHash((stageId,index+1))){
-              //              println(s"Valid result for task refering to stage ${stageId}, indexes ${index}, ${index+1}")
-            }
-            else{
-              //              println(s"BAD result for task refering to stage ${stageId}, indexes ${index}, ${index+1}")
-            }
-          }
-        }
-        else{
-          if(stageIndexToResultHash.contains((stageId, index-1))){
-            if(stageIndexToResultHash(stageIndex)==stageIndexToResultHash((stageId,index-1))){
-              //              println(s"Valid result for task refering to stage ${stageId}, indexes ${index}, ${index-1}")
-            }
-            else{
-              //              println(s"BAD result for task refering to stage ${stageId}, indexes ${index}, ${index-1}")
-            }
-          }
-        }
-      }
+  def verifyStageResults(stageId: Long): Unit = {
+    val result = s"python /home/kwstas/Workspace/spark/core/src/main/scala/org/apache/contract/resultVerifier.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
+    if (result == 0){
+      println(s"\nVerification of stage with Id: ${stageId} completed.")
+    }
+    else {
+      println("Error while communicating with Smart Contract")
     }
   }
-
-  def addResultAndVerify(tid: Long, hash: String): Unit={
-    addNewResultForTid(tid,hash)
-    verifyResult(tid)
-  }
-
-  def clean(): Unit = {
-    tidToStageIndexInfo = new HashMap[Long, (Int, Int)]
-    stageIndexToResultHash = new HashMap[(Int, Int), String]
-  }
-
 }
