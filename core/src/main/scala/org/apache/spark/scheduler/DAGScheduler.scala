@@ -2097,9 +2097,8 @@ private[spark] class DAGScheduler(
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
 
-      TaskResultVerificationManager.StageResultsVerifier(stage.id)
       var th = new Thread(new TaskResultVerificationManager.StageResultsVerifier(stage.id))
-      th.setName(s"stage ${stageIndex} checker")
+      th.setName(s"stage ${stage.id} checker")
       th.start()
 
       // Clear failure count for this stage, now that it's succeeded.

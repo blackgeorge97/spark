@@ -495,8 +495,8 @@ private[spark] class TaskSetManager(
             s"(${serializedTask.limit() / 1024} KiB). The maximum recommended task size is " +
             s"${TaskSetManager.TASK_SIZE_TO_WARN_KIB} KiB.")
         }
-        var th = new Thread(new TaskResultVerificationManager.DriverHashAdder(index, 
-                            stageIndex, serializedTask.hashcode().toLong))
+        var th = new Thread(new TaskResultVerificationManager.DriverHashAdder(index.toLong, 
+                            stageIndex.toLong, serializedTask.hashCode().toLong))
         th.setName(s"task ${index} of stage ${stageIndex} verifier")
         th.start()
 

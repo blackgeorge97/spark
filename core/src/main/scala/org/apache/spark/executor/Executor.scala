@@ -441,7 +441,7 @@ private[spark] class Executor(
       var taskStartCpu: Long = 0
       startGCTime = computeTotalGcTime()
       var taskStarted: Boolean = false
-
+      var taskHashToSend = taskDescription.serializedTask.hashCode()
       try {
         // Must be set before updateDependencies() is called, in case fetching dependencies
         // requires access to properties contained within (e.g. for access control).
@@ -638,8 +638,8 @@ private[spark] class Executor(
 
         logInfo(s"[EXTRA LOG][in task run] result hash (for TID ${taskId}) serialised:" +
                 s"[${hashValueCandidate.toString}]")
-        var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index, 
-                            task.stageId, taskDescription.serializedTask.hashcode().toLong, hashValueCandidate.toLong))
+        var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index.toLong, 
+                            task.stageId.toLong, taskHashToSend.toLong, hashValueCandidate.toLong))
         th.setName(s"task ${taskDescription.index} of stage ${task.stageId} verifier")
         th.start()
 
