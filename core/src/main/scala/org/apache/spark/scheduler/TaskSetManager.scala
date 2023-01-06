@@ -496,7 +496,7 @@ private[spark] class TaskSetManager(
             s"${TaskSetManager.TASK_SIZE_TO_WARN_KIB} KiB.")
         }
         var th = new Thread(new TaskResultVerificationManager.DriverHashAdder(index.toLong, 
-                            stageIndex.toLong, serializedTask.hashCode().toLong))
+                            task.stageId.toLong, serializedTask.hashCode().toLong))
         th.setName(s"task ${index} of stage ${stageIndex} verifier")
         th.start()
 
@@ -682,7 +682,6 @@ private[spark] class TaskSetManager(
                 taskSetBlacklist.isNodeBlacklistedForTaskSet(host) ||
                 taskSetBlacklist.isNodeBlacklistedForTask(host, indexInTaskSet)
             if (nodeBlacklisted) {
-              println("Ffffffffff")
               true
             } else {
               // Check if the task can run on any of the executors

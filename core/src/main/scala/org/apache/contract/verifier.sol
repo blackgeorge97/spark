@@ -56,6 +56,6 @@ contract sparkVerifier {
             }
         }
         return result;   
-}
+    }
 
 }
