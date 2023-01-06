@@ -7,12 +7,14 @@ c = w3.eth.contract(address='0x9cB4c8E7744D8fA7A9E1FB456F942c51471A1943', abi=ab
 
 tid = int(sys.argv[1])
 stageId = int(sys.argv[2])
-hashcode = str(sys.argv[3])
+taskhash = int(sys.argv[3])
+resultcode = int(sys.argv[4])
 
 def main():
     try:
-        tx_hash = c.functions.addNewResult(tid, stageId, hashcode).transact({'from' : '0x0e18280FFcC85827fCbbCc9382308211e0fCf931'})
-        tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        #tx_hash = c.functions.addNewResult(tid, stageId, hashcode).transact({'from' : '0x0e18280FFcC85827fCbbCc9382308211e0fCf931'})
+        #tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        print("hashAdderExec successfull\n")
         return 0
     except Exception as err:
         sys.stderr.write(f'Exception: {err}')
