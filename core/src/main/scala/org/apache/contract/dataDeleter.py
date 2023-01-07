@@ -9,15 +9,11 @@ c = w3.eth.contract(address='0x3d7962e7f51CAcA2973318DBD264677EDfEb93A4', abi=ab
 accountsArray = w3.eth.accounts
 account = accountsArray[1]
 
-tid = int(sys.argv[1])
-stageId = int(sys.argv[2])
-taskHash = int(sys.argv[3])
-resultHash = int(sys.argv[4])
-hostname = str(sys.argv[5])
+stageId = int(sys.argv[1])
 
 def main():
     try:
-        tx_hash = c.functions.addResultfromExec(tid, stageId, taskHash, resultHash, hostname).transact({'from' : account})
+        tx_hash = c.functions.emptyStageData(stageId).transact({'from' : account})
         tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
         return 0
     except Exception as err:

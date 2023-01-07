@@ -137,6 +137,10 @@ private[spark] class TaskSetManager(
    * @param index: Long, index of current task
    * @param host: String, hostaname || ip
    * @return Boolean
+   * Added by blackgeorge97
+   * @param addr: Option[String], when running locally check this instead of host
+   * When running on cluster use @param host to check
+   * When running locally on standalone mode use @param addr to check
    */
   private[scheduler] def isRelativeOnSameNode(index: Long, host: String, addr: Option[String], stage_id: Int): Boolean = {
 

@@ -16,15 +16,32 @@ contract sparkVerifier {
 
     mapping(uint => Library.data) public stageToExecTaskHash;
 
+    mapping(uint => string) public idToHostname;
+    mapping(string => uint) public hostnameToId;
+    mapping(uint => uint) public idToCount;
+    uint totalWorkers = 0;
+    uint totaltasks = 0;
+
     function addResultfromDriver(uint tid, uint stageId, int taskHash) public {
         stageToDriverTaskHash[stageId].hashes[tid] = taskHash;
         stageToDriverTaskHash[stageId].totalTasks += 1;
     }
 
-    function addResultfromExec(uint tid, uint stageId, int taskHash, int resultHash) public {
+    function addResultfromExec(uint tid, uint stageId, int taskHash, int resultHash, string memory hostname) public {
         stageToExecTaskHash[stageId].hashes[tid] = taskHash;
         stageToExecTaskHash[stageId].totalTasks += 1;
         stageToResultHash[stageId].hashes[tid] = resultHash;
+        totaltasks += 1;
+        if (hostnameToId[hostname] == 0) {
+            totalWorkers += 1;
+            hostnameToId[hostname] = totalWorkers;
+            idToHostname[totalWorkers] = hostname;
+            idToCount[totalWorkers] += 1;
+        }
+        else {
+            idToCount[hostnameToId[hostname]] += 1;
+        }
+
     }
 
     function verifyStageResults(uint stageId) public view returns (int) {
@@ -56,6 +73,27 @@ contract sparkVerifier {
             }
         }
         return result;   
+    }
+
+    function emptyStageData(uint stageId) public {
+        stageToExecTaskHash[stageId].totalTasks = 0;
+        stageToDriverTaskHash[stageId].totalTasks = 0;
+    }
+
+    function returnTotalWorkers() public view returns (uint) {
+        return totalWorkers;
+    }
+
+    function returnWorkerUsage(uint id, string memory hostname) public view returns (string memory, uint) {
+        uint result;
+        if (id < 0) {
+            id = hostnameToId[hostname];
+        }
+        else {
+            hostname = idToHostname[id];
+        }
+        result = idToCount[id]*100 / totaltasks;
+        return (hostname, result);
     }
 
 }

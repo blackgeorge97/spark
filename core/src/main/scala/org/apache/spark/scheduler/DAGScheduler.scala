@@ -1110,7 +1110,7 @@ private[spark] class DAGScheduler(
     val job = new ActiveJob(jobId, finalStage, callSite, listener, properties)
     clearCacheLocs()
     logInfo(s"HandleJob Submitted: ${jobId}")
-    logInfo("Got job %s (%s) with %d output partitions- john".format(
+    logInfo("Got job %s (%s) with %d output partitions".format(
       job.jobId, callSite.shortForm, partitions.length))
     logInfo("Final stage: " + finalStage + " (" + finalStage.name + ")")
     logInfo("Parents of final stage: " + finalStage.parents)
@@ -2097,9 +2097,17 @@ private[spark] class DAGScheduler(
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
 
-      var th = new Thread(new TaskResultVerificationManager.StageResultsVerifier(stage.id))
-      th.setName(s"stage ${stage.id} checker")
+      var verifier = new TaskResultVerificationManager.StageResultsVerifier(stage.id)
+      verifier.run()
+
+      var th = new Thread(new TaskResultVerificationManager.deleteStageData(stage.id))
+      th.setName(s"stage ${stage.id} deleter")
       th.start()
+      
+      var usageReturner = new TaskResultVerificationManager.workerUsageReturner()
+      usageReturner.run()
+
+
 
       // Clear failure count for this stage, now that it's succeeded.
       // We only limit consecutive failures of stage attempts,so that if a stage is

@@ -55,7 +55,6 @@ import org.apache.spark.shuffle.FetchFailedException
 import org.apache.spark.storage.{StorageLevel, TaskResultBlockId}
 import org.apache.spark.util._
 import org.apache.spark.util.io.ChunkedByteBuffer
-//import org.apache.spark.deploy.worker.localContractWorker
 
 import scala.io.Source
 /**
@@ -91,15 +90,6 @@ private[spark] class Executor(
   private val conf = env.conf
   val honestFlag = envOrElse("HONEST", "True");
   logInfo(s"[EXTRA LOG] HONEST FLAG: ${honestFlag} for executor-${executorId}")
-//  try{
-//    localContractWorker.instance().loadDeployedContract();
-//    logInfo("[WORKER] Successfully loaded deployed contract")
-//  } catch {
-//    case e: Throwable => {
-//      logError(e.toString)
-//      logError("[WORKER] filaed to launch contract")
-//    }
-//  }
 
   // No ip or host:port - just hostname
   Utils.checkHost(executorHostname)
@@ -259,15 +249,8 @@ private[spark] class Executor(
 
   def launchTask(context: ExecutorBackend, taskDescription: TaskDescription): Unit = {
     val tr = new TaskRunner(context, taskDescription)
-    //logInfo(s"[EXTRA LOG][EXECUTOR.scala/launchTask] called launchTask function for task ${taskDescription.taskId}")
     val taskId = taskDescription.taskId.toInt;
-    //println(s"[EXTRA LOG][EXECUTOR] calling localContractWorker.registerWorker with args ${taskId/2}")
-//    try {
-//      localContractWorker.instance().registerExecutor(taskId / 2, 123456);
-//      println(s"[EXTRA LOG] REGISTERED FOR  (TID= ${taskId}) in ${taskId/2}");
-//    }catch {
-//      case e: java.lang.RuntimeException => println(s"[EXECUTOR] ERROR ON REGISTERED FOR  (TID= ${taskId}) in ${taskId/2} => ${e.toString}")
-//    }
+
   runningTasks.put(taskDescription.taskId, tr)
     threadPool.execute(tr)
   }
@@ -639,27 +622,9 @@ private[spark] class Executor(
         logInfo(s"[EXTRA LOG][in task run] result hash (for TID ${taskId}) serialised:" +
                 s"[${hashValueCandidate.toString}]")
         var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index.toLong, 
-                            task.stageId.toLong, taskHashToSend.toLong, hashValueCandidate.toLong))
+                            task.stageId.toLong, taskHashToSend.toLong, hashValueCandidate.toLong, executorHostname))
         th.setName(s"task ${taskDescription.index} of stage ${task.stageId} verifier")
         th.start()
-
-//        try{
-//          var a = localContractWorker.instance().submitResults(taskId.toInt/2, resultHash, 1366);
-//          if(a.getError() != null){
-//            println(a.getError().getMessage)
-//          }
-//          //println(s"[EXECUTOR SUBMIT RESULTS] call OK! for task ${taskId}")
-//        } catch {
-//          case e: Throwable => {
-//            println(s"[EXECUTOR SUBMIT RESULTS] call failed (TID=${taskId}, HASH=${resultHash}) => " + e.toString)
-//            try{
-//              println(s"[EXECUTOR SUBMIT RESULTS] retry call (TID=${taskId}, HASH=${resultHash}) => " + e.toString)
-//              localContractWorker.instance().submitResults(taskId.toInt/2, resultHash, 12345);
-//            } catch {
-//              case e: Throwable => println(s"[EXECUTOR SUBMIT RESULTS] second failure for (TID=${taskId}, HASH=${resultHash}) => " + e.toString)
-//            }
-//          }
-//        }
 
         executorSource.SUCCEEDED_TASKS.inc(1L)
         setTaskFinishedAndClearInterruptStatus()
