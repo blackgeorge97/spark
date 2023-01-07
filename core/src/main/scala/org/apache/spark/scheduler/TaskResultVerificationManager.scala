@@ -92,7 +92,7 @@ extends Logging {
     {
       val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/usageReturner.py" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
-        println(s"\nVerification of stage with Id: ${stageId} completed.")
+        println(s"\nUsage of each worker has been returned successfully!")
       }
       else {
         println("Error while communicating with Smart Contract")
