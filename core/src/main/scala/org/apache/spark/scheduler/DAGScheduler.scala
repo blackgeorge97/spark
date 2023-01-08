@@ -2097,15 +2097,14 @@ private[spark] class DAGScheduler(
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
 
-      var verifier = new TaskResultVerificationManager.StageResultsVerifier(stage.id)
-      verifier.run()
+      var th1 = new Thread(new TaskResultVerificationManager.StageResultsVerifier(stage.id))
+      th1.start()
 
-      var th = new Thread(new TaskResultVerificationManager.deleteStageData(stage.id))
-      th.setName(s"stage ${stage.id} deleter")
-      th.start()
+      var th2 = new Thread(new TaskResultVerificationManager.deleteStageData(stage.id))
+      th2.start()
       
-      var usageReturner = new TaskResultVerificationManager.workerUsageReturner()
-      usageReturner.run()
+      var th3 = new Thread(new TaskResultVerificationManager.workerUsageReturner())
+      th3.start()
 
 
 
