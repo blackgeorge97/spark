@@ -3,6 +3,7 @@ import java.io._
 import sys.process._
 import org.apache.spark.internal.Logging
 import scala.collection.mutable.{HashMap, HashSet}
+import scala.collection.mutable._
 
 object TaskResultVerificationManager
 extends Logging {
@@ -51,25 +52,8 @@ extends Logging {
     }
   }
 
-  class StageResultsVerifier(
-    stageId: Long
-  ) 
-  extends Runnable 
-  {
-    override def run()
-    {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
-      if (result == 0){
-        println(s"\nVerification of stage with Id: ${stageId} completed.")
-      }
-      else {
-        println("Error while communicating with Smart Contract")
-      }
-    }
-  }
-
   class deleteStageData(
-    stageId: Long
+  stageId: Long
   )
   extends Runnable
   {
@@ -83,6 +67,35 @@ extends Logging {
         println("Error while communicating with Smart Contract")
       }
     }
+  }
+
+  class ResultsVerifier() 
+  extends Runnable 
+  {
+
+    private var stageQueue = Queue()
+
+    def addStageId(
+      stageId: Long
+    )
+    {
+       stageQueue.enqueue(stageId)
+    }
+
+    override def run()
+    {
+      while (!stageQueue.isEmpty){
+        stageId = stageQueue.dequeue
+        val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
+        if (result == 0){
+          println(s"\nVerification of stage with Id: ${stageId} completed.")
+        }
+        else {
+          println("Error while communicating with Smart Contract")
+        }
+        var deleter = new Thread(new deleteStageData(stageId))
+        deleter.start()
+      }
   }
 
   class workerUsageReturner() 

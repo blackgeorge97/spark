@@ -67,6 +67,7 @@ import org.apache.spark.storage.BlockManagerMessages.TriggerThreadDump
 import org.apache.spark.ui.{ConsoleProgressBar, SparkUI}
 import org.apache.spark.util._
 import org.apache.spark.util.logging.DriverLogger
+import org.apache.spark.scheduler.TaskResultVerificationManager
 
 /**
  * Main entry point for Spark functionality. A SparkContext represents the connection to a Spark
@@ -239,6 +240,8 @@ class SparkContext(config: SparkConf) extends Logging {
    * ------------------------------------------------------------------------------------- */
 
   private[spark] def conf: SparkConf = _conf
+  //Initiating the verifier, added by blackgeorge97 
+  private[spark] var verifier = new TaskResultVerificationManager.ResultsVerifier()
 
   /**
    * Return a copy of this SparkContext's configuration. The configuration ''cannot'' be
@@ -2058,6 +2061,11 @@ class SparkContext(config: SparkConf) extends Logging {
     localProperties.remove()
     // Unset YARN mode system env variable, to allow switching between cluster types.
     SparkContext.clearActiveContext()
+
+    verifier.run()
+      
+    var usageReturner = new TaskResultVerificationManager.workerUsageReturner()
+    usageReturner.run()
     logInfo("Successfully stopped SparkContext")
   }
 
