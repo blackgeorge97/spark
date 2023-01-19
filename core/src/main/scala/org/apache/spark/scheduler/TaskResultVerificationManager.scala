@@ -73,7 +73,7 @@ extends Logging {
   extends Runnable 
   {
 
-    private var stageQueue = Queue()
+    private var stageQueue = Queue[Long]()
 
     def addStageId(
       stageId: Long
@@ -85,7 +85,7 @@ extends Logging {
     override def run()
     {
       while (!stageQueue.isEmpty){
-        stageId = stageQueue.dequeue
+        val stageId = stageQueue.dequeue
         val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
         if (result == 0){
           println(s"\nVerification of stage with Id: ${stageId} completed.")
@@ -96,6 +96,7 @@ extends Logging {
         var deleter = new Thread(new deleteStageData(stageId))
         deleter.start()
       }
+    }
   }
 
   class workerUsageReturner() 

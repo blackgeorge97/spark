@@ -12,4 +12,4 @@ count = sc.parallelize(range(0, NUM_SAMPLES)) \
              .filter(inside).count()
 print("Pi is roughly %f" % (4.0 * count / NUM_SAMPLES))
 
-sc.close()
+sc.stop()
