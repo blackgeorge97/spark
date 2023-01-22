@@ -31,6 +31,7 @@ import org.apache.spark.rdd.RDD
  *
  * See [[Task]] for more information.
  *
+ * @param appId id of the app this task belongs to
  * @param stageId id of the stage this task belongs to
  * @param stageAttemptId attempt id of the stage this task belongs to
  * @param taskBinary broadcasted version of the serialized RDD and the function to apply on each
@@ -46,7 +47,6 @@ import org.apache.spark.rdd.RDD
  *
  * The parameters below are optional:
  * @param jobId id of the job this task belongs to
- * @param appId id of the app this task belongs to
  * @param appAttemptId attempt id of the app this task belongs to
  * @param isBarrier whether this task belongs to a barrier stage. Spark must launch all the tasks
  *                  at the same time for a barrier stage.

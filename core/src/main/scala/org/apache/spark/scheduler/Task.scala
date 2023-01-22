@@ -40,6 +40,7 @@ import org.apache.spark.util._
  * and sends the task output back to the driver application. A ShuffleMapTask executes the task
  * and divides the task output to multiple buckets (based on the task's partitioner).
  *
+ * @param appId id of the app this task belongs to
  * @param stageId id of the stage this task belongs to
  * @param stageAttemptId attempt id of the stage this task belongs to
  * @param partitionId index of the number in the RDD
@@ -49,7 +50,6 @@ import org.apache.spark.util._
  *
  * The parameters below are optional:
  * @param jobId id of the job this task belongs to
- * @param appId id of the app this task belongs to
  * @param appAttemptId attempt id of the app this task belongs to
  * @param isBarrier whether this task belongs to a barrier stage. Spark must launch all the tasks
  *                  at the same time for a barrier stage.
