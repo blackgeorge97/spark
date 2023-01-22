@@ -88,8 +88,8 @@ private[spark] class Executor(
   private val EMPTY_BYTE_BUFFER = ByteBuffer.wrap(new Array[Byte](0))
 
   private val conf = env.conf
-  val honestFlag = envOrElse("HONEST", "True");
-  logInfo(s"[EXTRA LOG] HONEST FLAG: ${honestFlag} for executor-${executorId}")
+  //val honestFlag = envOrElse("HONEST", "True");
+  //logInfo(s"[EXTRA LOG] HONEST FLAG: ${honestFlag} for executor-${executorId}")
 
   // No ip or host:port - just hostname
   Utils.checkHost(executorHostname)
@@ -521,10 +521,10 @@ private[spark] class Executor(
         var valueBytes = resultSer.serialize(value)
 
 
-        if(honestFlag == "False" && taskId.toInt == 7) {
-          logInfo(s"[EXTRA LOG] TRYING TO CHEAT")
-          valueBytes = resultSer.serialize("123")
-        }
+        //if(honestFlag == "False" && taskId.toInt == 7) {
+          //logInfo(s"[EXTRA LOG] TRYING TO CHEAT")
+          //valueBytes = resultSer.serialize("123")
+        //}
 
         val afterSerializationNs = System.nanoTime()
 
@@ -587,7 +587,7 @@ private[spark] class Executor(
         // Note: accumulator updates must be collected after TaskMetrics is updated
         val accumUpdates = task.collectAccumulatorUpdates()
         var metricPeaks = metricsPoller.getTaskMetricPeaks(taskId)  //array[Long]
-        val hashSize : Int = envOrElse("HASH_SIZE", "250").toInt
+        val hashSize : Int = 250
 
         val resultBufferAsArray =  Arrays.toString(valueBytes.array())
         val hashValueCandidate = resultBufferAsArray.slice(0, hashSize).hashCode().toLong
