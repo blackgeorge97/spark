@@ -1315,13 +1315,13 @@ private[spark] class DAGScheduler(
             //logInfo(s"[EXTRA LOG] creating new ShuffleMapTask")
             stage.pendingPartitions += id
             Seq[Task[_]](
-              new ShuffleMapTask(stage.id, stage.latestInfo.attemptNumber,
+              new ShuffleMapTask(sc.applicationId, stage.id, stage.latestInfo.attemptNumber,
                 taskBinary, part, locs, properties, serializedTaskMetrics, Option(jobId),
-                Option(sc.applicationId), sc.applicationAttemptId, stage.rdd.isBarrier())
+                sc.applicationAttemptId, stage.rdd.isBarrier())
               ,
-              new ShuffleMapTask(stage.id, stage.latestInfo.attemptNumber,
+              new ShuffleMapTask(sc.applicationId, stage.id, stage.latestInfo.attemptNumber,
                 taskBinary, part, locs, properties, serializedTaskMetrics, Option(jobId),
-                Option(sc.applicationId), sc.applicationAttemptId, stage.rdd.isBarrier())
+                sc.applicationAttemptId, stage.rdd.isBarrier())
             )
           }
         case stage: ResultStage =>
@@ -1332,14 +1332,14 @@ private[spark] class DAGScheduler(
             logInfo(s"[EXTRA LOG] prefered locations: ${locs}")
             //logInfo(s"[EXTRA LOG] creating new ResultTask")
             Seq[Task[_]](   
-              new ResultTask(stage.id, stage.latestInfo.attemptNumber,
+              new ResultTask(sc.applicationId, stage.id, stage.latestInfo.attemptNumber,
                 taskBinary, part, locs, id, properties, serializedTaskMetrics,
-                Option(jobId), Option(sc.applicationId), sc.applicationAttemptId,
+                Option(jobId), sc.applicationAttemptId,
                 stage.rdd.isBarrier()) 
               ,
-              new ResultTask(stage.id, stage.latestInfo.attemptNumber,
+              new ResultTask(sc.applicationId, stage.id, stage.latestInfo.attemptNumber,
               taskBinary, part, locs, id, properties, serializedTaskMetrics,
-              Option(jobId), Option(sc.applicationId), sc.applicationAttemptId,
+              Option(jobId), sc.applicationAttemptId,
               stage.rdd.isBarrier())
             ) 
           }

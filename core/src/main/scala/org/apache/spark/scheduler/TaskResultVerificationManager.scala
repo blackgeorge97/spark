@@ -34,7 +34,7 @@ extends Logging {
 
   class ExecHashAdder(
     tid: Long,
-    appId: String
+    appId: String,
     stageId: Long,
     taskHash: Long,
     resultHash: Long,
@@ -63,7 +63,7 @@ extends Logging {
     {
       val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${appId}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
-        println(s"Verification of stage with Id: ${stageId} completed.")
+        println(s"Verification of app with Id: ${appId} completed.")
       }
       else {
           println("Error while communicating with Smart Contract")

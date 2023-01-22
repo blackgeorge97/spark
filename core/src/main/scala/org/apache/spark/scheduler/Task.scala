@@ -55,6 +55,7 @@ import org.apache.spark.util._
  *                  at the same time for a barrier stage.
  */
 private[spark] abstract class Task[T](
+    val appId: String,
     val stageId: Int,
     val stageAttemptId: Int,
     val partitionId: Int,
@@ -63,7 +64,6 @@ private[spark] abstract class Task[T](
     serializedTaskMetrics: Array[Byte] =
       SparkEnv.get.closureSerializer.newInstance().serialize(TaskMetrics.registered).array(),
     val jobId: Option[Int] = None,
-    val appId: Option[String] = None,
     val appAttemptId: Option[String] = None,
     val isBarrier: Boolean = false) extends Serializable {
 
@@ -115,7 +115,7 @@ private[spark] abstract class Task[T](
     new CallerContext(
       "TASK",
       SparkEnv.get.conf.get(APP_CALLER_CONTEXT),
-      appId,
+      Option(appId),
       appAttemptId,
       jobId,
       Option(stageId),

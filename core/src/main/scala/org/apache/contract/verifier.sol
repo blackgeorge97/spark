@@ -102,6 +102,11 @@ contract sparkVerifier {
         }
     }
 
+    function checkData(uint tid, string memory appId, uint stageId) public view returns (int, int, int) {
+        return (app[appId].stage[stageId].task[tid].driverTaskHash, app[appId].stage[stageId].task[tid].execTaskHash, 
+                app[appId].stage[stageId].task[tid]. resultHash);
+    }
+
     function returnAppStatus(string memory appId) public view returns (int) {
         if (app[appId].driverTasks !=app[appId].execTasks){
             return -1;

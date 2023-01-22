@@ -52,6 +52,7 @@ import org.apache.spark.rdd.RDD
  *                  at the same time for a barrier stage.
  */
 private[spark] class ResultTask[T, U](
+    appId: String,
     stageId: Int,
     stageAttemptId: Int,
     taskBinary: Broadcast[Array[Byte]],
@@ -61,11 +62,10 @@ private[spark] class ResultTask[T, U](
     localProperties: Properties,
     serializedTaskMetrics: Array[Byte],
     jobId: Option[Int] = None,
-    appId: Option[String] = None,
     appAttemptId: Option[String] = None,
     isBarrier: Boolean = false)
-  extends Task[U](stageId, stageAttemptId, partition.index, localProperties, serializedTaskMetrics,
-    jobId, appId, appAttemptId, isBarrier)
+  extends Task[U](appId, stageId, stageAttemptId, partition.index, localProperties, serializedTaskMetrics,
+    jobId, appAttemptId, isBarrier)
   with Serializable {
 
   @transient private[this] val preferredLocs: Seq[TaskLocation] = {

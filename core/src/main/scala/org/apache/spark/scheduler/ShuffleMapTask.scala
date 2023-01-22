@@ -50,6 +50,7 @@ import org.apache.spark.rdd.RDD
  *                  at the same time for a barrier stage.
  */
 private[spark] class ShuffleMapTask(
+    appId: String,
     stageId: Int,
     stageAttemptId: Int,
     taskBinary: Broadcast[Array[Byte]],
@@ -58,16 +59,15 @@ private[spark] class ShuffleMapTask(
     localProperties: Properties,
     serializedTaskMetrics: Array[Byte],
     jobId: Option[Int] = None,
-    appId: Option[String] = None,
     appAttemptId: Option[String] = None,
     isBarrier: Boolean = false)
-  extends Task[MapStatus](stageId, stageAttemptId, partition.index, localProperties,
-    serializedTaskMetrics, jobId, appId, appAttemptId, isBarrier)
+  extends Task[MapStatus](appId, stageId, stageAttemptId, partition.index, localProperties,
+    serializedTaskMetrics, jobId, appAttemptId, isBarrier)
   with Logging {
 
   /** A constructor used only in test suites. This does not require passing in an RDD. */
   def this(partitionId: Int) {
-    this(0, 0, null, new Partition { override def index: Int = 0 }, null, new Properties, null)
+    this("", 0, 0, null, new Partition { override def index: Int = 0 }, null, new Properties, null)
   }
 
   @transient private val preferredLocs: Seq[TaskLocation] = {
