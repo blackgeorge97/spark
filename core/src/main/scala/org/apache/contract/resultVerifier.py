@@ -24,11 +24,11 @@ def main():
         elif res == -1:
             print("The verification of stage with stage Id: " + str(stageId) + " was unsuccessful because some tasks were missing!\n")
         elif res == 1:
-            print("The verification of stage with stage Id: " + str(stageId) + " was sunsuccessful because of worker's fault!")
+            print("The verification of stage with stage Id: " + str(stageId) + " was unsuccessful because of worker's fault!")
         elif res == 2:
-            print("The verification of stage with stage Id: " + str(stageId) + " was sunsuccessful because of client's fault!")
+            print("The verification of stage with stage Id: " + str(stageId) + " was unsuccessful because of client's fault!")
         elif res == 3:
-            print("The verification of stage with stage Id: " + str(stageId) + " was sunsuccessful, but there is not enought information to find error!")
+            print("The verification of stage with stage Id: " + str(stageId) + " was unsuccessful, but there is not enought information to find error!")
         return 0
     except Exception as err:
         sys.stderr.write(f'Exception: {err}')

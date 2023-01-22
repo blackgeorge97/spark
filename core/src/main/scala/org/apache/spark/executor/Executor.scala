@@ -466,7 +466,7 @@ private[spark] class Executor(
         } else 0L
         var threwException = true
         logInfo(( s"[EXTRA LOG][Executor.scala/taskRunnerClass/run function] "
-                 + s"starting running task ${taskId} on executor (probably ? )") )
+                 + s"starting running task ${taskId} on executor") )
         val value = Utils.tryWithSafeFinally {
           val res = task.run(
             taskAttemptId = taskId,

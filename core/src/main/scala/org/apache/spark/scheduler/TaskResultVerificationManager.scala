@@ -61,7 +61,7 @@ extends Logging {
     {
       val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/dataDeleter.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
-        println(s"\nData stage with Id: ${stageId} is cleared.")
+        println(s"Data stage with Id: ${stageId} is cleared.")
       }
       else {
         println("Error while communicating with Smart Contract")
@@ -88,7 +88,7 @@ extends Logging {
         val stageId = stageQueue.dequeue
         val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
         if (result == 0){
-          println(s"\nVerification of stage with Id: ${stageId} completed.")
+          println(s"Verification of stage with Id: ${stageId} completed.")
         }
         else {
           println("Error while communicating with Smart Contract")
@@ -106,7 +106,7 @@ extends Logging {
     {
       val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/usageReturner.py" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
-        println(s"\nUsage of each worker has been returned successfully!")
+        println(s"Usage of each worker has been returned successfully!")
       }
       else {
         println("Error while communicating with Smart Contract")
