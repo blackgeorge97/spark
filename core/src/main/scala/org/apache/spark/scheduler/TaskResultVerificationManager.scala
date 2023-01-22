@@ -14,14 +14,15 @@ extends Logging {
   
   class DriverHashAdder(
     tid: Long,
+    appId: String,
     stageId: Long,
     taskHash: Long
-  ) 
+  )
   extends Runnable 
   {
     override def run()
     {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/hashAdderDriver.py ${tid} ${stageId} ${taskHash}" ! ProcessLogger(stdout append _, stderr append _)
+      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/hashAdderDriver.py ${tid} ${appId} ${stageId} ${taskHash}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
         println(s"Task hashcode of task index ${tid} of stage ${stageId} send to verifier Smart Contract")
       }
@@ -33,6 +34,7 @@ extends Logging {
 
   class ExecHashAdder(
     tid: Long,
+    appId: String
     stageId: Long,
     taskHash: Long,
     resultHash: Long,
@@ -42,7 +44,7 @@ extends Logging {
   {
     override def run()
     {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/hashAdderExec.py ${tid} ${stageId} ${taskHash} ${resultHash} ${hostname}" ! ProcessLogger(stdout append _, stderr append _)
+      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/hashAdderExec.py ${tid} ${appId} ${stageId} ${taskHash} ${resultHash} ${hostname}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
         println(s"Task hashcode and result hashcode of task index ${tid} of stage ${stageId} send to verifier Smart Contract")
       }
@@ -52,49 +54,19 @@ extends Logging {
     }
   }
 
-  class deleteStageData(
-  stageId: Long
-  )
-  extends Runnable
-  {
-    override def run()
-    {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/dataDeleter.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
-      if (result == 0){
-        println(s"Data stage with Id: ${stageId} is cleared.")
-      }
-      else {
-        println("Error while communicating with Smart Contract")
-      }
-    }
-  }
-
-  class ResultsVerifier() 
+  class ResultsVerifier(
+    appId: String
+  ) 
   extends Runnable 
   {
-
-    private var stageQueue = Queue[Long]()
-
-    def addStageId(
-      stageId: Long
-    )
-    {
-       stageQueue.enqueue(stageId)
-    }
-
     override def run()
     {
-      while (!stageQueue.isEmpty){
-        val stageId = stageQueue.dequeue
-        val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
-        if (result == 0){
-          println(s"Verification of stage with Id: ${stageId} completed.")
-        }
-        else {
+      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${appId}" ! ProcessLogger(stdout append _, stderr append _)
+      if (result == 0){
+        println(s"Verification of stage with Id: ${stageId} completed.")
+      }
+      else {
           println("Error while communicating with Smart Contract")
-        }
-        var deleter = new Thread(new deleteStageData(stageId))
-        deleter.start()
       }
     }
   }

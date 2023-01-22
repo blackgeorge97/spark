@@ -86,7 +86,7 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
 
 //              println(hashValueCandidate)
 //              println(s"[EXTRA LOG] hash ${hashValueCandidate.hashCode().toString} FOR TID $tid, original byte array size $resultSize")
-              logInfo("Calling addNewResultTasks from task verification manager")
+              //logInfo("Calling addNewResultTasks from task verification manager")
               //TaskResultVerificationManager.addNewResultForTid(tid, hashSize.toString)
               (directResult, serializedData.limit())
             case IndirectTaskResult(blockId, size) =>

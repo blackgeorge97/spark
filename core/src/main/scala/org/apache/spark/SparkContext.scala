@@ -240,9 +240,7 @@ class SparkContext(config: SparkConf) extends Logging {
    * ------------------------------------------------------------------------------------- */
 
   private[spark] def conf: SparkConf = _conf
-  //Initiating the verifier, added by blackgeorge97 
-  private[spark] var verifier = new TaskResultVerificationManager.ResultsVerifier()
-
+ 
   /**
    * Return a copy of this SparkContext's configuration. The configuration ''cannot'' be
    * changed at runtime.
@@ -2061,11 +2059,14 @@ class SparkContext(config: SparkConf) extends Logging {
     localProperties.remove()
     // Unset YARN mode system env variable, to allow switching between cluster types.
     SparkContext.clearActiveContext()
+    val someRes = sys.env.get("SPARK_HOME").orElse(sys.props.get("spark.test.home"))
+    val strbuild = new StringBuilder()
+    someRes.addString(strbuild)
+    val sparkHome = strbuild.toString
+    val pw = new PrintWriter(new File(sparkHome + "/toVerify/" + applicationId.toString + ".txt"))
+    pw.write(applicationId.toString)
+    pw.close
 
-    verifier.run()
-      
-    var usageReturner = new TaskResultVerificationManager.workerUsageReturner()
-    usageReturner.run()
     logInfo("Successfully stopped SparkContext")
   }
 

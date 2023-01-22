@@ -122,9 +122,6 @@ private[spark] class DAGScheduler(
     clock: Clock = new SystemClock())
   extends Logging {
 
-  //Getting verifier from sc, added by blackgeorge97
-  private[spark] var verifier = sc.verifier
-
   def this(sc: SparkContext, taskScheduler: TaskScheduler) = {
     this(
       sc,
@@ -2099,8 +2096,6 @@ private[spark] class DAGScheduler(
     if (errorMessage.isEmpty) {
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
-
-      verifier.addStageId(stage.id)
 
       // Clear failure count for this stage, now that it's succeeded.
       // We only limit consecutive failures of stage attempts,so that if a stage is

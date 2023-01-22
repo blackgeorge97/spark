@@ -10,15 +10,15 @@ accountsArray = w3.eth.accounts
 account = accountsArray[1]
 
 tid = int(sys.argv[1])
-stageId = int(sys.argv[2])
-taskHash = int(sys.argv[3])
-resultHash = int(sys.argv[4])
-hostname = str(sys.argv[5])
+appId = str(sys.argv[2])
+stageId = int(sys.argv[3])
+taskHash = int(sys.argv[4])
+resultHash = int(sys.argv[5])
+hostname = str(sys.argv[6])
 
 def main():
     try:
-        tx_hash = c.functions.addResultfromExec(tid, stageId, taskHash, resultHash, hostname).transact({'from' : account})
-        tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        tx_hash = c.functions.addResultfromExec(tid, appId, stageId, taskHash, resultHash, hostname).transact({'from' : account})
         return 0
     except Exception as err:
         sys.stderr.write(f'Exception: {err}')

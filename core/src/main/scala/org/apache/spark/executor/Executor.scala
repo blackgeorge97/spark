@@ -621,7 +621,7 @@ private[spark] class Executor(
 
         logInfo(s"[EXTRA LOG][in task run] result hash (for TID ${taskId}) serialised:" +
                 s"[${hashValueCandidate.toString}]")
-        var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index.toLong, 
+        var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index.toLong, task.appId.toString,
                             task.stageId.toLong, taskHashToSend.toLong, hashValueCandidate.toLong, executorHostname))
         th.setName(s"task ${taskDescription.index} of stage ${task.stageId} verifier")
         th.start()

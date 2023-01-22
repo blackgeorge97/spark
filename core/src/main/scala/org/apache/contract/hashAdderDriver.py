@@ -11,13 +11,13 @@ account = accountsArray[0]
 
 
 tid = int(sys.argv[1])
-stageId = int(sys.argv[2])
-taskHash = int(sys.argv[3])
+appId = str(sys.argv[2])
+stageId = int(sys.argv[3])
+taskHash = int(sys.argv[4])
 
 def main():
     try:
-        tx_hash = c.functions.addResultfromDriver(tid, stageId, taskHash).transact({'from' : account})
-        tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        tx_hash = c.functions.addResultfromDriver(tid, appId, stageId, taskHash).transact({'from' : account})
         return 0
     except Exception as err:
         sys.stderr.write(f'Exception: {err}')
