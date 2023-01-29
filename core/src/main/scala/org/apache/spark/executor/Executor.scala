@@ -587,7 +587,7 @@ private[spark] class Executor(
         // Note: accumulator updates must be collected after TaskMetrics is updated
         val accumUpdates = task.collectAccumulatorUpdates()
         var metricPeaks = metricsPoller.getTaskMetricPeaks(taskId)  //array[Long]
-        val hashSize : Int = envOrElse("HASH_SIZE", "250").toInt
+        val hashSize : Int = envOrElse("HASH_SIZE", "50").toInt
 
         val resultBufferAsArray =  Arrays.toString(valueBytes.array())
         val hashValueCandidate = resultBufferAsArray.slice(0, hashSize).hashCode().toLong

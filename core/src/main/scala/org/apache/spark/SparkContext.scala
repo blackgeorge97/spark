@@ -397,6 +397,13 @@ class SparkContext(config: SparkConf) extends Logging {
     _conf = config.clone()
     _conf.validateSettings()
     _conf.set("spark.app.startTime", startTime.toString)
+    val someRes = sys.env.get("SPARK_HOME").orElse(sys.props.get("spark.test.home"))
+    val strbuild = new StringBuilder()
+    someRes.addString(strbuild)
+    val sparkHome = strbuild.toString
+    val pw = new PrintWriter(new File(sparkHome + "/toVerify/" + applicationId.toString + ".txt"))
+    pw.write(applicationId.toString + "\n")
+    pw.close
 
     if (!_conf.contains("spark.master")) {
       throw new SparkException("A master URL must be set in your configuration")
@@ -2059,13 +2066,6 @@ class SparkContext(config: SparkConf) extends Logging {
     localProperties.remove()
     // Unset YARN mode system env variable, to allow switching between cluster types.
     SparkContext.clearActiveContext()
-    val someRes = sys.env.get("SPARK_HOME").orElse(sys.props.get("spark.test.home"))
-    val strbuild = new StringBuilder()
-    someRes.addString(strbuild)
-    val sparkHome = strbuild.toString
-    val pw = new PrintWriter(new File(sparkHome + "/toVerify/" + applicationId.toString + ".txt"))
-    pw.write(applicationId.toString)
-    pw.close
 
     logInfo("Successfully stopped SparkContext")
   }

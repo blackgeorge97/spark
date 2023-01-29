@@ -53,37 +53,4 @@ extends Logging {
       }
     }
   }
-
-  class ResultsVerifier(
-    appId: String
-  ) 
-  extends Runnable 
-  {
-    override def run()
-    {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/resultVerifier.py ${appId}" ! ProcessLogger(stdout append _, stderr append _)
-      if (result == 0){
-        println(s"Verification of app with Id: ${appId} completed.")
-      }
-      else {
-          println("Error while communicating with Smart Contract")
-      }
-    }
-  }
-
-  class workerUsageReturner() 
-  extends Runnable 
-  {
-    override def run()
-    {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/usageReturner.py" ! ProcessLogger(stdout append _, stderr append _)
-      if (result == 0){
-        println(s"Usage of each worker has been returned successfully!")
-      }
-      else {
-        println("Error while communicating with Smart Contract")
-      }
-    }
-  }
-
 }
