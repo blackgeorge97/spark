@@ -2097,7 +2097,7 @@ private[spark] class DAGScheduler(
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
       val sparkHome = sc.getSparkHome().get
-      val fw = new FileWriter(sparkHome + "/toVerify/" + sc.applicationId + ".txt", true)
+      val fw = new FileWriter(sparkHome + "/contract/toVerify/" + sc.applicationId + ".txt", true)
       try {
         fw.write(s"${stage.id} ${stage.numTasks}\n")
       }

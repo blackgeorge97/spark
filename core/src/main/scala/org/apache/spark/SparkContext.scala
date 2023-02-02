@@ -598,7 +598,7 @@ class SparkContext(config: SparkConf) extends Logging {
     val strbuild = new StringBuilder()
     someRes.addString(strbuild)
     val sparkHome = strbuild.toString
-    val pw = new PrintWriter(new File(sparkHome + "/toVerify/" + _applicationId.toString + ".txt"))
+    val pw = new PrintWriter(new File(sparkHome + "/contract/toVerify/" + _applicationId.toString + ".txt"))
     pw.write(applicationId.toString + "\n")
     pw.close
 

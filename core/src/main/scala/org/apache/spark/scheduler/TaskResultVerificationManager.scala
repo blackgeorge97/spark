@@ -22,7 +22,7 @@ extends Logging {
   {
     override def run()
     {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/hashAdderDriver.py ${tid} ${appId} ${stageId} ${taskHash}" ! ProcessLogger(stdout append _, stderr append _)
+      val result = s"python ${sparkHome}/contract/hashAdderDriver.py ${tid} ${appId} ${stageId} ${taskHash}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
         println(s"Task hashcode of task index ${tid} of stage ${stageId} send to verifier Smart Contract")
       }
@@ -44,7 +44,7 @@ extends Logging {
   {
     override def run()
     {
-      val result = s"python ${sparkHome}/core/src/main/scala/org/apache/contract/hashAdderExec.py ${tid} ${appId} ${stageId} ${taskHash} ${resultHash} ${hostname}" ! ProcessLogger(stdout append _, stderr append _)
+      val result = s"python ${sparkHome}/contract/hashAdderExec.py ${tid} ${appId} ${stageId} ${taskHash} ${resultHash} ${hostname}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
         println(s"Task hashcode and result hashcode of task index ${tid} of stage ${stageId} send to verifier Smart Contract")
       }

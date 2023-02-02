@@ -88,8 +88,8 @@ private[spark] class Executor(
   private val EMPTY_BYTE_BUFFER = ByteBuffer.wrap(new Array[Byte](0))
 
   private val conf = env.conf
-  //val honestFlag = envOrElse("HONEST", "True");
-  //logInfo(s"[EXTRA LOG] HONEST FLAG: ${honestFlag} for executor-${executorId}")
+  val honestFlag = envOrElse("HONEST", "True");
+  logInfo(s"[EXTRA LOG] HONEST FLAG: ${honestFlag} for executor-${executorId}")
 
   // No ip or host:port - just hostname
   Utils.checkHost(executorHostname)
@@ -521,10 +521,10 @@ private[spark] class Executor(
         var valueBytes = resultSer.serialize(value)
 
 
-        //if(honestFlag == "False" && taskId.toInt == 7) {
-          //logInfo(s"[EXTRA LOG] TRYING TO CHEAT")
-          //valueBytes = resultSer.serialize("123")
-        //}
+        if(honestFlag == "False" && taskId.toInt == 7) {
+          logInfo(s"[EXTRA LOG] TRYING TO CHEAT")
+          valueBytes = resultSer.serialize("123")
+        }
 
         val afterSerializationNs = System.nanoTime()
 
