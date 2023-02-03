@@ -31,7 +31,7 @@ def main():
                         break
                     stage = int(line.split()[0])
                     taskNum = int(line.split()[1])
-                    for i in range(0, int(taskNum/2)):
+                    for i in range(0, int(taskNum)):
                         (driverHash1, execHash1, resultHash1, driver1, exec1) = c.caller().checkData(2*i, appId, stage)
                         (driverHash2, execHash2, resultHash2, driver2, exec2) = c.caller().checkData(2*i + 1, appId, stage)
                         if (driver1 == False or exec1 == False or driver2 == False or exec2 == False):

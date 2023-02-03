@@ -146,8 +146,8 @@ private[spark] class TaskSetManager(
 
     if(stage_id >= 0) {
       if (taskIndexToHost.contains(stage_id)) {
-        if ((index % 2 == 0 && taskIndexToHost(stage_id).contains(index + 1) && taskIndexToHost(stage_id)(index + 1) == addr) ||
-          (index % 2 == 1 && taskIndexToHost(stage_id).contains(index - 1) && taskIndexToHost(stage_id)(index - 1) == addr)) {
+        if ((index % 2 == 0 && taskIndexToHost(stage_id).contains(index + 1) && taskIndexToHost(stage_id)(index + 1) == host) ||
+          (index % 2 == 1 && taskIndexToHost(stage_id).contains(index - 1) && taskIndexToHost(stage_id)(index - 1) == host)) {
           return true
         }
       }
@@ -460,9 +460,9 @@ private[spark] class TaskSetManager(
         val task = tasks(index)
         val taskId = sched.newTaskId()
         if (taskIndexToHost.contains(taskSet.stageId)) {
-          taskIndexToHost(taskSet.stageId).put(index.toLong, addr)
+          taskIndexToHost(taskSet.stageId).put(index.toLong, host)
         } else{
-          taskIndexToHost.put(taskSet.stageId,HashMap(index.toLong -> addr))
+          taskIndexToHost.put(taskSet.stageId,HashMap(index.toLong -> host))
         }
 
         val stageIndex = (taskSet.stageId, index)
