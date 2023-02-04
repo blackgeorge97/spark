@@ -75,7 +75,7 @@ private[spark] class TaskSetManager(
   /**
    * Added by john
    */
-  val taskIndexToHost = new mutable.HashMap[Int, HashMap[Long, Option[String]]]
+  val taskIndexToHost = new mutable.HashMap[Int, HashMap[Long, String]]
 
 
   val tasks = taskSet.tasks
