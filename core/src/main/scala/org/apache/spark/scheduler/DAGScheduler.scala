@@ -1537,6 +1537,8 @@ private[spark] class DAGScheduler(
             postTaskEnd(unpostedTaskEndEvent(stageId)(taskIndex / 2))
             postTaskEnd(event)
             addCompletedTaskPerStage(stageId, 2)
+            var th = new Thread(new TaskResultVerificationManager.postUpdater(taskIndex, taskIndex + 1, applicationId, stageId))
+            th.start()
           }
           else{
             try {
@@ -1545,6 +1547,8 @@ private[spark] class DAGScheduler(
             postTaskEnd(event)
             postTaskEnd(unpostedTaskEndEvent(stageId)(taskIndex / 2))
             addCompletedTaskPerStage(stageId, 2)
+            var th = new Thread(new TaskResultVerificationManager.postUpdater(taskIndex - 1, taskIndex, applicationId, stageId))
+            th.start()
           }
           fw.close()
         }

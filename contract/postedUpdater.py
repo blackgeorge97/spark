@@ -10,14 +10,14 @@ accountsArray = w3.eth.accounts
 account = accountsArray[0]
 
 
-tid = int(sys.argv[1])
-appId = str(sys.argv[2])
-stageId = int(sys.argv[3])
-taskHash = int(sys.argv[4])
+tid1 = int(sys.argv[1])
+tid2 = int(sys.argv[2])
+appId = str(sys.argv[3])
+stageId = int(sys.argv[4])
 
 def main():
     try:
-        tx_hash = c.functions.addResultfromDriver(tid, appId, stageId, taskHash).transact({'from' : account})
+        tx_hash = c.functions.updatePostedTaskPair(tid1, tid2, appId, stageId).transact({'from' : account})
         return 0
     except Exception as err:
         sys.stderr.write(f'Exception: {err}')
