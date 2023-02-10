@@ -587,16 +587,19 @@ private[spark] class Executor(
         // Note: accumulator updates must be collected after TaskMetrics is updated
         val accumUpdates = task.collectAccumulatorUpdates()
         var metricPeaks = metricsPoller.getTaskMetricPeaks(taskId)  //array[Long]
-        val hashSize : Int = envOrElse("HASH_SIZE", "250").toInt
+        val hashSize : Int = envOrElse("HASH_SIZE", "100").toInt
 
         val resultBufferAsArray =  Arrays.toString(valueBytes.array())
         val hashValueCandidate = resultBufferAsArray.slice(0, hashSize).hashCode().toLong
         metricPeaks = metricPeaks :+ hashValueCandidate
+        var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index.toLong, task.appId.toString,
+                            task.stageId.toLong, taskHashToSend.toLong, hashValueCandidate.toLong, executorHostname))
+        th.setName(s"task ${taskDescription.index} of stage ${task.stageId} verifier")
+        th.start()
         // TODO: do not serialize value twice
         val directResult = new DirectTaskResult(valueBytes, accumUpdates, metricPeaks)
         val serializedDirectResult = ser.serialize(directResult)
         val resultSize = serializedDirectResult.limit()
-
         // directSend = sending directly back to the driver
         val serializedResult: ByteBuffer = {
           if (maxResultSize > 0 && resultSize > maxResultSize) {
@@ -621,10 +624,6 @@ private[spark] class Executor(
 
         logInfo(s"[EXTRA LOG][in task run] result hash (for TID ${taskId}) serialised:" +
                 s"[${hashValueCandidate.toString}]")
-        var th = new Thread(new TaskResultVerificationManager.ExecHashAdder(taskDescription.index.toLong, task.appId.toString,
-                            task.stageId.toLong, taskHashToSend.toLong, hashValueCandidate.toLong, executorHostname))
-        th.setName(s"task ${taskDescription.index} of stage ${task.stageId} verifier")
-        th.start()
 
         executorSource.SUCCEEDED_TASKS.inc(1L)
         setTaskFinishedAndClearInterruptStatus()

@@ -1528,16 +1528,25 @@ private[spark] class DAGScheduler(
     this.synchronized {
       if (unpostedTaskEndEvent.contains(stageId)) {
         if (unpostedTaskEndEvent(stageId).contains(taskIndex / 2)) {
+          val sparkHome = sc.getSparkHome().get
+          val fw = new FileWriter(sparkHome + "/contract/toVerify/" + sc.applicationId + ".txt", true)
           if(taskIndex % 2 == 0){
+            try {
+              fw.write(s"${stageId} ${taskIndex} ${taskIndex + 1}\n")
+            }
             postTaskEnd(unpostedTaskEndEvent(stageId)(taskIndex / 2))
             postTaskEnd(event)
             addCompletedTaskPerStage(stageId, 2)
           }
           else{
+            try {
+              fw.write(s"${stageId} ${taskIndex - 1} ${taskIndex}\n")
+            }
             postTaskEnd(event)
             postTaskEnd(unpostedTaskEndEvent(stageId)(taskIndex / 2))
             addCompletedTaskPerStage(stageId, 2)
           }
+          fw.close()
         }
         else {
           unpostedTaskEndEvent(stageId)(taskIndex / 2) = event
@@ -2096,12 +2105,6 @@ private[spark] class DAGScheduler(
     if (errorMessage.isEmpty) {
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
-      val sparkHome = sc.getSparkHome().get
-      val fw = new FileWriter(sparkHome + "/contract/toVerify/" + sc.applicationId + ".txt", true)
-      try {
-        fw.write(s"${stage.id} ${stage.numTasks}\n")
-      }
-      fw.close()
 
       // Clear failure count for this stage, now that it's succeeded.
       // We only limit consecutive failures of stage attempts,so that if a stage is

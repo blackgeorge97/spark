@@ -5,7 +5,7 @@ import time
 
 w3 = web3.Web3(web3.HTTPProvider('http://192.168.0.1:7545'))
 abi = "[ { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" }, { \"internalType\": \"int256\", \"name\": \"taskHash\", \"type\": \"int256\" } ], \"name\": \"addResultfromDriver\", \"outputs\": [], \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" }, { \"internalType\": \"int256\", \"name\": \"taskHash\", \"type\": \"int256\" }, { \"internalType\": \"int256\", \"name\": \"resultHash\", \"type\": \"int256\" }, { \"internalType\": \"string\", \"name\": \"hostname\", \"type\": \"string\" } ], \"name\": \"addResultfromExec\", \"outputs\": [], \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" } ], \"name\": \"checkData\", \"outputs\": [ { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" }, { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" }, { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" }, { \"internalType\": \"bool\", \"name\": \"\", \"type\": \"bool\" }, { \"internalType\": \"bool\", \"name\": \"\", \"type\": \"bool\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" } ], \"name\": \"returnAppStatus\", \"outputs\": [ { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [], \"name\": \"returnTotalWorkers\", \"outputs\": [ { \"internalType\": \"uint256\", \"name\": \"\", \"type\": \"uint256\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"id\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"hostname\", \"type\": \"string\" } ], \"name\": \"returnWorkerUsage\", \"outputs\": [ { \"internalType\": \"string\", \"name\": \"\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"\", \"type\": \"uint256\" } ], \"stateMutability\": \"view\", \"type\": \"function\" } ]"
-c = w3.eth.contract(address='0xBc8e1084dBD6D882803394b7bb2758200F5Ef6bd', abi=abi)
+c = w3.eth.contract(address='0xcfDd3fFb7224c7E45E442FdA1C9E8C0A53175d79', abi=abi)
 
 
 def main():
@@ -30,21 +30,21 @@ def main():
                     if (res != 0):
                         break
                     stage = int(line.split()[0])
-                    taskNum = int(line.split()[1])
-                    for i in range(0, int(taskNum)):
-                        (driverHash1, execHash1, resultHash1, driver1, exec1) = c.caller().checkData(2*i, appId, stage)
-                        (driverHash2, execHash2, resultHash2, driver2, exec2) = c.caller().checkData(2*i + 1, appId, stage)
-                        if (driver1 == False or exec1 == False or driver2 == False or exec2 == False):
-                            res = -1
-                            break
-                        if (resultHash1 != resultHash2) :
-                            res = 1
-                            if (execHash1 != execHash2):
-                                if (driverHash1 == execHash1 and driverHash2 == execHash2):
-                                    res = 2
-                                else:
-                                    res = 3
-                            break
+                    taskIndex1 = int(line.split()[1])
+                    taskIndex2 = int(line.split()[2])
+                    (driverHash1, execHash1, resultHash1, driver1, exec1) = c.caller().checkData(taskIndex1, appId, stage)
+                    (driverHash2, execHash2, resultHash2, driver2, exec2) = c.caller().checkData(taskIndex2, appId, stage)
+                    if (driver1 == False or exec1 == False or driver2 == False or exec2 == False):
+                        res = -1
+                        break
+                    if (resultHash1 != resultHash2) :
+                        res = 1
+                        if (execHash1 != execHash2):
+                            if (driverHash1 == execHash1 and driverHash2 == execHash2):
+                                res = 2
+                            else:
+                                res = 3
+                        break
             if res == 0:
                 print("The verification of app with app Id: " + str(appId) + " was successful!\n")
             elif res == -1:
