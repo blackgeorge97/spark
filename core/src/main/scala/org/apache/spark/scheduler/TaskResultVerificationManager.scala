@@ -64,7 +64,7 @@ extends Logging {
   {
     override def run()
     {
-      val result = s"python3.8 ${sparkHome}/contract/hashAdderExec.py ${tid1} ${tid1} ${appId} ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
+      val result = s"python3.8 ${sparkHome}/contract/postedUpdater.py ${tid1} ${tid1} ${appId} ${stageId}" ! ProcessLogger(stdout append _, stderr append _)
       if (result == 0){
         println(s"Post action of taskpair ${tid1} ${tid1} send to Smart Contract")
       }
