@@ -76,11 +76,13 @@ contract sparkVerifier {
 
 
     function updatePostedTaskPair(uint tid1, uint tid2, string memory appId, uint stageId) public {
-        app[appId].stage[stageId].task[tid1].posted = true;
-        app[appId].stage[stageId].task[tid2].posted = true;
-        int status = verifyPair(appId, stageId, tid1, tid2);
-        if (status != 0) {
-            app[appId].status = status;
+        if (app[appId].stage[stageId].task[tid1].posted == false && app[appId].stage[stageId].task[tid2].posted == false) {
+            app[appId].stage[stageId].task[tid1].posted = true;
+            app[appId].stage[stageId].task[tid2].posted = true;
+            int status = verifyPair(appId, stageId, tid1, tid2);
+            if (status != 0) {
+                app[appId].status = status;
+            }
         }
     }
 
