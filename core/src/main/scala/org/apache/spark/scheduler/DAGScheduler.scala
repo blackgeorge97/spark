@@ -247,6 +247,7 @@ private[spark] class DAGScheduler(
   var taskPerStage = new HashMap[Int, Int]
   var completedTasksPerStage = new HashMap[Int, Int]
   var partitionPerResultStage = new HashMap[Int, Int] // partitionId => events completed for this partition
+  var codeHashPerTask = new HashMap[Int, HashMap[Int, Int]]
 
   def addPartitionPerResultStage(partitionId: Int): Unit= {
     if (partitionPerResultStage.contains(partitionId)){
@@ -1532,7 +1533,7 @@ private[spark] class DAGScheduler(
           val fw = new FileWriter(sparkHome + "/contract/toVerify/" + sc.applicationId + ".txt", true)
           if(taskIndex % 2 == 0){
             try {
-              fw.write(s"${stageId} ${taskIndex} ${taskIndex + 1}\n")
+              fw.write(s"${stageId} ${taskIndex} ${taskIndex + 1} ${codeHashPerTask(stageId)(taskIndex)} ${codeHashPerTask(stageId)(taskIndex + 1)}\n")
             }
             postTaskEnd(unpostedTaskEndEvent(stageId)(taskIndex / 2))
             postTaskEnd(event)
@@ -1540,7 +1541,7 @@ private[spark] class DAGScheduler(
           }
           else{
             try {
-              fw.write(s"${stageId} ${taskIndex - 1} ${taskIndex}\n")
+              fw.write(s"${stageId} ${taskIndex - 1} ${taskIndex} ${codeHashPerTask(stageId)(taskIndex - 1)} ${codeHashPerTask(stageId)(taskIndex)}\n")
             }
             postTaskEnd(event)
             postTaskEnd(unpostedTaskEndEvent(stageId)(taskIndex / 2))

@@ -6,7 +6,6 @@ library Library {
         int driverTaskHash;
         int execTaskHash;
         int resultHash;
-        bool driver;
         bool exec;
         bool posted;
     }
@@ -32,7 +31,7 @@ contract sparkVerifier {
 
     function verifyPair(string memory appId, uint stageId, uint tid1, uint tid2) private view returns (int){
         int status = 0;
-        if (app[appId].stage[stageId].task[tid1].driver == false || app[appId].stage[stageId].task[tid2].driver == false){
+        if (app[appId].stage[stageId].task[tid1].posted == false || app[appId].stage[stageId].task[tid2].posted == false){
             return -2;
         }
         if (app[appId].stage[stageId].task[tid1].exec == false || app[appId].stage[stageId].task[tid2].exec == false){
@@ -53,11 +52,6 @@ contract sparkVerifier {
         return status;
     }
 
-    function addResultfromDriver(uint tid, string memory appId, uint stageId, int taskHash) public {
-        app[appId].stage[stageId].task[tid].driverTaskHash = taskHash;
-        app[appId].stage[stageId].task[tid].driver = true;
-    }
-
     function addResultfromExec(uint tid, string memory appId, uint stageId, int taskHash, int resultHash, string memory hostname) public {
         if (hostnameToId[hostname] == 0) {
             totalWorkers += 1;
@@ -75,8 +69,10 @@ contract sparkVerifier {
     }
 
 
-    function updatePostedTaskPair(uint tid1, uint tid2, string memory appId, uint stageId) public {
+    function updatePostedTaskPair(uint tid1, uint tid2, int taskHash1, int taskHash2, string memory appId, uint stageId) public {
         if (app[appId].stage[stageId].task[tid1].posted == false && app[appId].stage[stageId].task[tid2].posted == false) {
+            app[appId].stage[stageId].task[tid1].driverTaskHash = taskHash1;
+            app[appId].stage[stageId].task[tid2].driverTaskHash = taskHash2;
             app[appId].stage[stageId].task[tid1].posted = true;
             app[appId].stage[stageId].task[tid2].posted = true;
             int status = verifyPair(appId, stageId, tid1, tid2);
@@ -88,7 +84,7 @@ contract sparkVerifier {
 
     function checkData(uint tid, string memory appId, uint stageId) public view returns (int, int, int, bool, bool) {
         return (app[appId].stage[stageId].task[tid].driverTaskHash, app[appId].stage[stageId].task[tid].execTaskHash, 
-                app[appId].stage[stageId].task[tid].resultHash, app[appId].stage[stageId].task[tid].driver, 
+                app[appId].stage[stageId].task[tid].resultHash, app[appId].stage[stageId].task[tid].posted,
                 app[appId].stage[stageId].task[tid].exec);
     }
 

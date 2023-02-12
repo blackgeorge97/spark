@@ -12,26 +12,6 @@ extends Logging {
   someRes.addString(strbuild)
   val sparkHome = strbuild.toString
   
-  class DriverHashAdder(
-    tid: Long,
-    appId: String,
-    stageId: Long,
-    taskHash: Long
-  )
-  extends Runnable 
-  {
-    override def run()
-    {
-      val result = s"python3.8 ${sparkHome}/contract/hashAdderDriver.py ${tid} ${appId} ${stageId} ${taskHash}" ! ProcessLogger(stdout append _, stderr append _)
-      if (result == 0){
-        println(s"Task hashcode of task index ${tid} of stage ${stageId} send to verifier Smart Contract")
-      }
-      else {
-        println("Error while communicating with Smart Contract")
-      }
-    }
-  }
-
   class ExecHashAdder(
     tid: Long,
     appId: String,

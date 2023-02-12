@@ -5,7 +5,7 @@ import time
 
 w3 = web3.Web3(web3.HTTPProvider('http://192.168.0.1:7545'))
 abi = "[ { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" }, { \"internalType\": \"int256\", \"name\": \"taskHash\", \"type\": \"int256\" } ], \"name\": \"addResultfromDriver\", \"outputs\": [], \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" }, { \"internalType\": \"int256\", \"name\": \"taskHash\", \"type\": \"int256\" }, { \"internalType\": \"int256\", \"name\": \"resultHash\", \"type\": \"int256\" }, { \"internalType\": \"string\", \"name\": \"hostname\", \"type\": \"string\" } ], \"name\": \"addResultfromExec\", \"outputs\": [], \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" } ], \"name\": \"checkData\", \"outputs\": [ { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" }, { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" }, { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" }, { \"internalType\": \"bool\", \"name\": \"\", \"type\": \"bool\" }, { \"internalType\": \"bool\", \"name\": \"\", \"type\": \"bool\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" } ], \"name\": \"returnAppStatus\", \"outputs\": [ { \"internalType\": \"int256\", \"name\": \"\", \"type\": \"int256\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [], \"name\": \"returnTotalWorkers\", \"outputs\": [ { \"internalType\": \"uint256\", \"name\": \"\", \"type\": \"uint256\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"id\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"hostname\", \"type\": \"string\" } ], \"name\": \"returnWorkerUsage\", \"outputs\": [ { \"internalType\": \"string\", \"name\": \"\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"\", \"type\": \"uint256\" } ], \"stateMutability\": \"view\", \"type\": \"function\" }, { \"inputs\": [ { \"internalType\": \"uint256\", \"name\": \"tid1\", \"type\": \"uint256\" }, { \"internalType\": \"uint256\", \"name\": \"tid2\", \"type\": \"uint256\" }, { \"internalType\": \"string\", \"name\": \"appId\", \"type\": \"string\" }, { \"internalType\": \"uint256\", \"name\": \"stageId\", \"type\": \"uint256\" } ], \"name\": \"updatePostedTaskPair\", \"outputs\": [], \"stateMutability\": \"nonpayable\", \"type\": \"function\" } ]"
-c = w3.eth.contract(address='0x2F439192c5E23080a02C315D7faDA42dEf9Fb7c2', abi=abi)
+c = w3.eth.contract(address='0x0F0D441C461d6ac36eDe6134dd64bB2C02d9e432', abi=abi)
 #The next two lines should be replaced with a function two get the individual workers wallet address
 #For now we get a ready address from Ganache
 accountsArray = w3.eth.accounts
@@ -35,16 +35,17 @@ def main():
                     stage = int(line.split()[0])
                     taskIndex1 = int(line.split()[1])
                     taskIndex2 = int(line.split()[2])
+                    hash1 = int(line.split()[3])
+                    hash2 = int(line.split()[4])
                     if (ver_method == 2):
                         try:
-                            tx_hash = c.functions.updatePostedTaskPair(taskIndex1,taskIndex2, appId, stage).transact({'from' : account})
+                            tx_hash = c.functions.updatePostedTaskPair(taskIndex1, taskIndex2, hash1, hash2, appId, stage).transact({'from' : account})
                         except Exception as err:
                             sys.stderr.write(f'Exception: {err}')
-                    (driverHash1, execHash1, resultHash1, driver1, exec1) = c.caller().checkData(taskIndex1, appId, stage)
-                    (driverHash2, execHash2, resultHash2, driver2, exec2) = c.caller().checkData(taskIndex2, appId, stage)
-                    if (driver1 == False  or driver2 == False ):
-                        res = -2
-                        break
+                    (driverHash1, execHash1, resultHash1, posted1, exec1) = c.caller().checkData(taskIndex1, appId, stage)
+                    (driverHash2, execHash2, resultHash2, posted2, exec2) = c.caller().checkData(taskIndex2, appId, stage)
+                    if (posted1 == False or posted2 == False):
+                        print("To verify data of smart contract please post tasks.")
                     if (exec1 == False or exec2 == False):
                         res = -1
                         break
@@ -67,7 +68,7 @@ def main():
             elif res == 2:
                 print("The verification of app with app Id: " + str(appId) + " was unsuccessful because of client's fault!")
             elif res == 3:
-                print("The verification of app with app Id: " + str(appId) + " was unsuccessful, but there is not enought information to find error!")
+                print("The verification of app with app Id: " + str(appId) + " failed because client sent wrong hash to executor!")
         workersNum = c.caller().returnTotalWorkers()
         for i in range(1, workersNum + 1):
             (host, res) =  c.caller().returnWorkerUsage(i, "")
